@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>타이머</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>TIMER</h1>
+      <div>
+        <input value="00" min="0" id="hour" type="number" />
+        <label for="hour">hrs</label>
+        <input value="00" min="0" max="59" id="min" type="number" />
+        <label for="min">min</label>
+        <input value="00" min="0" max="59" id="sec" type="number" />
+        <label for="sec">sec</label>
+      </div>
+      <div>
+        <button class="start">START</button>
+        <button class="pause deactivate">PAUSE</button>
+        <button class="reset">RESET</button>
+      </div>
+    </main>
+    <script>
+      const start = document.querySelector("button.start");
+      const pause = document.querySelector("button.pause");
+      const reset = document.querySelector("button.reset");
+
+      const inputs = document.querySelectorAll("input");
+      const hour = inputs[0];
+      const min = inputs[1];
+      const sec = inputs[2];
+
+      inputs.forEach((el) => {
+        el.addEventListener("change", () => {
+          el.value = el.value.toString().padStart(2, "0");
+
+          if (el.id === "min" || el.id === "sec") {
+            if (el.value > 59) {
+              el.value = "59";
+            }
+          }
+        });
+      });
+
+      let isStop = false;
+
+      function timerHandler(finish) {
+        isStop = false;
+        const timerFinish = finish;
+        let timer = setInterval((finish) => {
+          const timerNow = new Date();
+          const timerObject = new Date(0);
+          timerObject.setUTCMilliseconds(
+            timerFinish.getTime() - timerNow.getTime() + 1000
+          );
+
+          // 타이머 숫자 전환 코드
+          inputs[0].value = timerObject
+            .getUTCHours()
+            .toString()
+            .padStart(2, "0");
+          inputs[1].value = timerObject
+            .getUTCMinutes()
+            .toString()
+            .padStart(2, "0");
+          inputs[2].value = timerObject
+            .getUTCSeconds()
+            .toString()
+            .padStart(2, "0");
+
+          // 타이머 종료 기능
+          if (timerNow.getTime() > timerFinish.getTime() || isStop) {
+            timerObject.setUTCMilliseconds(0);
+            clearInterval(timer);
+            start.classList.remove("deactivate");
+            pause.classList.add("deactivate");
+          }
+
+          if (timerNow.getTime() > timerFinish.getTime()) {
+            alert("Finish");
+          }
+
+          if (isStop) {
+            inputs.forEach((element) => {
+              element.value = "00";
+            });
+          }
+        }, 100);
+      }
+
+      reset.addEventListener("click", () => {
+        isStop = true;
+      });
+
+      start.addEventListener("click", (e) => {
+        const now = new Date();
+        const finish = new Date();
+        const result =
+          parseInt(hour.value) * 3600 +
+          parseInt(min.value) * 60 +
+          parseInt(sec.value);
+
+        finish.setTime(finish.getTime() + result * 1000);
+
+        timerHandler(finish);
+
+        start.classList.add("deactivate");
+        pause.classList.remove("deactivate");
+      });
+
+      pause.addEventListener("click", (e) => {
+        isStop = true;
+
+        pause.classList.add("deactivate");
+        start.classList.remove("deactivate");
+      });
+    </script>
+  </body>
+</html>
